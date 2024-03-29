@@ -1,5 +1,6 @@
 //! напиши всю логіку роботи додатка
 
+import axios from 'axios';
 import iziToast from 'izitoast'; // Описаний у документації
 import 'izitoast/dist/css/iziToast.min.css'; // Додатковий імпорт стилів
 
@@ -7,26 +8,39 @@ import SimpleLightbox from 'simplelightbox'; // Описаний у докуме
 import 'simplelightbox/dist/simple-lightbox.min.css'; // Додатковий імпорт стилів
 
 import { getImages } from './js/pixabay-api';
-import { imagesTemplate } from './js/render-function';
+import { renderGallery } from './js/render-function';
 
-const formEl = document.querySelector('.form');
-const gallery = document.querySelector('.gallery');
-const loaderEl = document.querySelector('.loader');
+export const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+});
 
-function deleteLoader() {
-  loaderEl.classList.add('is-hidden');
-}
+export const refs = {
+  formEl: document.querySelector('.form'),
+  gallery: document.querySelector('.gallery'),
+  loaderEl: document.querySelector('.loader'),
+  btnLoadMore: document.querySelector('.loadMore'),
+};
 
-function createLoader() {
-  loaderEl.classList.remove('is-hidden');
-}
+let query;
+let currentPage = 1;
+let maxPage = 0;
+const perPage = 15;
+
+refs.formEl.addEventListener('submit', onFormSubmit);
+refs.btnLoadMore.addEventListener('click', onLoadMoreClick);
 
 deleteLoader();
-formEl.addEventListener('submit', e => {
+hideLoadMore();
+
+async function onFormSubmit(e) {
   e.preventDefault();
   createLoader();
-  gallery.innerHTML = '';
-  const query = e.target.elements.request.value.trim();
+
+  query = e.target.elements.request.value.trim();
+  refs.gallery.innerHTML = '';
+  currentPage = 1;
 
   if (!query) {
     deleteLoader();
@@ -37,31 +51,73 @@ formEl.addEventListener('submit', e => {
     return;
   }
 
-  getImages(query)
-    .then(data => {
-      if (data.hits.length === 0) {
-        deleteLoader();
-        iziToast.error({
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-        });
-        return;
-      }
-      const markup = imagesTemplate(data.hits);
-      gallery.insertAdjacentHTML('beforeend', markup);
-      lightbox.refresh();
+  try {
+    createLoader();
+    const data = await getImages(query, currentPage);
+    console.log(data);
+    if (data.hits.length === 0) {
       deleteLoader();
-    })
-    .catch(err => {
-      console.log(err);
-      deleteLoader();
-    });
-  formEl.reset();
-});
+      iziToast.error({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight',
+      });
+      return;
+    }
+    maxPage = Math.ceil(data.totalHits / perPage);
+    renderGallery(data.hits);
+  } catch (err) {
+    console.log(err);
+  }
 
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  captionDelay: 250,
-});
+  deleteLoader();
+  checkBtnStatus();
+  refs.formEl.reset();
+}
+
+async function onLoadMoreClick() {
+  currentPage += 1;
+  createLoader();
+  try {
+    const data = await getImages(query, currentPage);
+    renderGallery(data.hits);
+  } catch (err) {
+    console.log(err);
+  }
+
+  myScroll();
+  checkBtnStatus();
+  deleteLoader();
+}
+
+function showLoadMore() {
+  refs.btnLoadMore.classList.remove('is-hidden');
+}
+function hideLoadMore() {
+  refs.btnLoadMore.classList.add('is-hidden');
+}
+
+function checkBtnStatus() {
+  if (currentPage >= maxPage) {
+    hideLoadMore();
+  } else {
+    showLoadMore();
+  }
+}
+
+function deleteLoader() {
+  refs.loaderEl.classList.add('is-hidden');
+}
+
+function createLoader() {
+  refs.loaderEl.classList.remove('is-hidden');
+}
+
+function myScroll() {
+  const height = refs.gallery.firstChild.getBoundingClientRect().height;
+
+  scrollBy({
+    top: height,
+    behavior: 'smooth',
+  });
+}

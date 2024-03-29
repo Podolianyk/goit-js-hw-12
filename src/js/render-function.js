@@ -1,3 +1,5 @@
+import { refs, lightbox } from '../main.js';
+
 function imageTemplate({
   webformatURL,
   largeImageURL,
@@ -9,7 +11,7 @@ function imageTemplate({
 }) {
   return `<li class="gallery-item">
           <a class="gallery-link" href="${webformatURL}">
-        <img class="gallery-image" src="${largeImageURL}" alt="${tags}" />
+        <img loading="lazy" class="gallery-image" src="${largeImageURL}" alt="${tags}" />
       </a>
         <div class="image-info">
     <ul class="infoBlock">
@@ -32,6 +34,12 @@ function imageTemplate({
   </li>`;
 }
 
-export function imagesTemplate(arr) {
+function imagesTemplate(arr) {
   return arr.map(imageTemplate).join('');
+}
+
+export function renderGallery(arr) {
+  const markup = imagesTemplate(arr);
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
 }

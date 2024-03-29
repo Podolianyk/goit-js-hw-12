@@ -53,7 +53,7 @@ input::placeholder {
   color: #808080;
 }
 
-button {
+.btn {
   cursor: pointer;
   border: none;
   border-radius: 8px;
@@ -67,6 +67,16 @@ button {
   line-height: 1.5;
   letter-spacing: 0.04em;
   color: #fff;
+}
+
+.loarMoreContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.loadMore {
+  width: 120px;
+  margin-top: 25px;
 }
 
 ul,
@@ -136,6 +146,7 @@ img {
 .is-hidden {
   opacity: 0;
   visibility: hidden;
+  display: none;
 }
 
 .loader {
