@@ -50,7 +50,7 @@ async function onFormSubmit(e) {
   }
 
   try {
-    createLoader();
+    // createLoader();
     const data = await getImages(query, currentPage);
     console.log(data);
     if (data.hits.length === 0) {
@@ -98,6 +98,10 @@ function hideLoadMore() {
 function checkBtnStatus() {
   if (currentPage >= maxPage) {
     hideLoadMore();
+    iziToast.error({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'topRight',
+    });
   } else {
     showLoadMore();
   }
