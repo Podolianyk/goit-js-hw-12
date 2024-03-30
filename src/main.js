@@ -50,7 +50,6 @@ async function onFormSubmit(e) {
   }
 
   try {
-    // createLoader();
     const data = await getImages(query, currentPage);
     console.log(data);
     if (data.hits.length === 0) {
