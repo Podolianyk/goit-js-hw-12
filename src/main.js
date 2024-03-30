@@ -1,6 +1,3 @@
-//! напиши всю логіку роботи додатка
-
-import axios from 'axios';
 import iziToast from 'izitoast'; // Описаний у документації
 import 'izitoast/dist/css/iziToast.min.css'; // Додатковий імпорт стилів
 
@@ -44,6 +41,7 @@ async function onFormSubmit(e) {
 
   if (!query) {
     deleteLoader();
+    hideLoadMore();
     iziToast.error({
       message: 'Please enter a request',
       position: 'topRight',
