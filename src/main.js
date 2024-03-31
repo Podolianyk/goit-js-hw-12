@@ -20,7 +20,7 @@ export const refs = {
   btnLoadMore: document.querySelector('.loadMore'),
 };
 
-let query;
+let searchQuery;
 let currentPage = 1;
 let maxPage = 0;
 const perPage = 15;
@@ -35,11 +35,11 @@ async function onFormSubmit(e) {
   e.preventDefault();
   createLoader();
 
-  query = e.target.elements.request.value.trim();
+  searchQuery = e.target.elements.request.value.trim();
   refs.gallery.innerHTML = '';
   currentPage = 1;
 
-  if (!query) {
+  if (!searchQuery) {
     deleteLoader();
     hideLoadMore();
     iziToast.error({
@@ -50,7 +50,7 @@ async function onFormSubmit(e) {
   }
 
   try {
-    const data = await getImages(query, currentPage);
+    const data = await getImages(searchQuery, currentPage);
     console.log(data);
     if (data.hits.length === 0) {
       deleteLoader();
@@ -76,7 +76,7 @@ async function onLoadMoreClick() {
   currentPage += 1;
   createLoader();
   try {
-    const data = await getImages(query, currentPage);
+    const data = await getImages(searchQuery, currentPage);
     renderGallery(data.hits);
   } catch (err) {
     console.log(err);
